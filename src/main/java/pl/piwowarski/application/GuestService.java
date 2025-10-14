@@ -3,11 +3,13 @@ package pl.piwowarski.application;
 import pl.piwowarski.model.Guest;
 import pl.piwowarski.repositories.GuestRepository;
 
+import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Optional;
 
 @Service
-class GuestService {
+public class GuestService {
 
     private final GuestRepository guestRepository;
 
@@ -15,22 +17,18 @@ class GuestService {
         this.guestRepository = guestRepository;
     }
 
-    @Override
     public Guest saveGuest(Guest guest) {
         return guestRepository.save(guest);
     }
 
-    @Override
     public List<Guest> getAllGuests() {
         return guestRepository.findAll();
     }
 
-    @Override
     public Optional<Guest> getGuestById(Long id) {
         return guestRepository.findById(id);
     }
 
-    @Override
     public Guest updateGuest(Long id, Guest updatedGuest) {
         return guestRepository.findById(id)
                 .map(existing -> {
@@ -44,11 +42,17 @@ class GuestService {
                 .orElseThrow(() -> new RuntimeException("Guest not found with id: " + id));
     }
 
-    @Override
     public void deleteGuest(Long id) {
         if (!guestRepository.existsById(id)) {
             throw new RuntimeException("Guest not found with id: " + id);
         }
         guestRepository.deleteById(id);
+    }
+
+    public Guest registerGuest(Guest guest) {
+        if (guestRepository.existsByEmail(guest.getEmail())) {
+            throw new RuntimeException("Guest with email " + guest.getEmail() + " already exists");
+        }
+        return guestRepository.save(guest);
     }
 }
