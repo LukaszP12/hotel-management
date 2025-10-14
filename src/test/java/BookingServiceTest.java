@@ -2,6 +2,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import pl.piwowarski.model.Booking;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
