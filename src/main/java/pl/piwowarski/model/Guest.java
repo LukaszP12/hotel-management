@@ -1,5 +1,19 @@
 package pl.piwowarski.model;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Pattern;
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -34,13 +48,10 @@ public class Guest {
 
     public Guest() {}
 
-    public Guest(Long id, String firstName, String lastName, String email, String phoneNumber, LocalDate dateOfBirth) {
-        this.id = id;
+    public Guest(String firstName, String lastName, String email) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
-        this.phoneNumber = phoneNumber;
-        this.dateOfBirth = dateOfBirth;
     }
 
     // Getters & Setters
