@@ -133,8 +133,21 @@ class BookingServiceTest {
         when(bookingRepository.findById(3L)).thenReturn(Optional.of(booking));
         // then
         assertThatThrownBy(() ->
-                bookingService.checkIn(3L, LocalDate.of(2025,3,10))
+                bookingService.checkIn(3L, LocalDate.of(2025, 3, 10))
         ).isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("cancelled");
+    }
+
+    @Test
+    void checkIn_shouldNotAllowAlreadyCheckedIn() {
+        // given
+        Booking booking = buildBooking(4L, 1L, "2025-03-10", "2025-03-15", BookingStatus.CHECKED_IN);
+        // when
+        when(bookingRepository.findById(4L)).thenReturn(Optional.of(booking));
+        // then
+        assertThatThrownBy(() ->
+                bookingService.checkIn(4L, LocalDate.of(2025,3,10))
+        ).isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("already checked in");
     }
 }
