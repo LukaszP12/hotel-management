@@ -124,4 +124,17 @@ class BookingServiceTest {
         ).isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("too early");
     }
+
+    @Test
+    void checkIn_shouldNotAllowCancelledBookings() {
+        // given
+        Booking booking = buildBooking(3L, 1L, "2025-03-10", "2025-03-15", BookingStatus.CANCELLED);
+        // when
+        when(bookingRepository.findById(3L)).thenReturn(Optional.of(booking));
+        // then
+        assertThatThrownBy(() ->
+                bookingService.checkIn(3L, LocalDate.of(2025,3,10))
+        ).isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("cancelled");
+    }
 }
