@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -56,6 +57,28 @@ public class AvailabilityService {
         }
 
         return result;
+    }
+
+    public List<Room> getAvailableRooms(LocalDate start, LocalDate end, Long roomTypeId, int minCapacity) {
+        if (start == null || end == null || !start.isBefore(end)) {
+            throw new IllegalArgumentException("Invalid date range: start must be before end");
+        }
+        List<Room> rooms = roomRepository.findFiltered(roomTypeId, minCapacity);
+        if (rooms.isEmpty()) {
+            return List.of();
+        }
+
+        List<Long> roomIds = rooms.stream().map(Room::getId).toList();
+
+        List<Booking> overlappingBookings = bookingRepository.findOverlappingForRooms(roomIds, start, end);
+
+        Set<Long> bookedRoomsIds = overlappingBookings.stream()
+                .map(b -> b.getRoom().getId())
+                .collect(Collectors.toSet());
+
+        return rooms.stream()
+                .filter(room -> !bookedRoomsIds.contains(room.getId()))
+                .toList();
     }
 
     // === DTOs for response ===

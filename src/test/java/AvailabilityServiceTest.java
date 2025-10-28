@@ -1,5 +1,6 @@
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import pl.piwowarski.application.AvailabilityService;
 import pl.piwowarski.model.booking.Booking;
 import pl.piwowarski.model.Room;
 import pl.piwowarski.model.booking.BookingStatus;
@@ -10,6 +11,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -89,7 +91,7 @@ class AvailabilityServiceTest {
         var rooms = List.of(buildRoom(1L, "Room A"));
 
         Booking cancelled = buildBooking(1L, "2025-01-11", "2025-01-13");
-        cancelled.setStatus(BookingStatus.CANCELLED);
+        cancelled.setBookingStatus(BookingStatus.CANCELLED);
 
         when(roomRepository.findFiltered(null, 1)).thenReturn(rooms);
         when(bookingRepository.findOverlappingForRooms(any(), any(), any()))
@@ -98,6 +100,24 @@ class AvailabilityServiceTest {
         var result = availabilityService.calendar(start, end, null, 1);
         assertThat(result.get(0).days())
                 .allMatch(day -> !day.occupied());
+    }
+
+    @Test
+    void shouldReturnOnlyRoomsThatAreFreeInGivenDateRange() {
+        // given
+        var roomA = buildRoom(1L, "Room A");
+        var roomB = buildRoom(2L, "Room B");
+        var rooms = List.of(roomA, roomB);
+        // when
+        when(roomRepository.findFiltered(null, 1)).thenReturn(rooms);
+        when(bookingRepository.findOverlappingForRooms(any(), any(), any()))
+                .thenReturn(List.of(
+                        buildBooking(1L, "2025-01-10", "2025-01-13")
+                ));
+        var freeRooms = availabilityService.getAvailableRooms(start, end, null, 1);
+
+        // then
+        assertThat(freeRooms).containsExactly(roomB);
     }
 
     @Test
