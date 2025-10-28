@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -62,5 +63,17 @@ class BookingServiceHistoryTest {
         List<Booking> history = bookingService.getBookingHistoryForGuest(guestId);
         // then
         assertThat(history).hasSize(2);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenGuestNotFound() {
+        // Arrange
+        Long guestId = 999L;
+        when(guestRepository.existsById(guestId)).thenReturn(false);
+
+        // Act & Assert
+        assertThatThrownBy(() -> bookingService.getBookingHistoryForGuest(guestId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Guest not found");
     }
 }
