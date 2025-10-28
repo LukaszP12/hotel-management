@@ -97,7 +97,19 @@ class BookingServiceTest {
                 LocalDate.of(2025, 2, 2), LocalDate.of(2025, 2, 6));
         // then
         assertThat(result.getRoom().getId()).isEqualTo(2L);
-        assertThat(result.getCheckInDate()).isEqualTo(LocalDate.of(2025,2,2));
-        assertThat(result.getCheckOutDate()).isEqualTo(LocalDate.of(2025,2,6));
+        assertThat(result.getCheckInDate()).isEqualTo(LocalDate.of(2025, 2, 2));
+        assertThat(result.getCheckOutDate()).isEqualTo(LocalDate.of(2025, 2, 6));
+    }
+
+    @Test
+    void checkIn_shouldSetStatusToCheckedIn_whenValid() {
+        // given
+        Booking booking = buildBooking(1L, 1L, "2025-02-10", "2025-02-15", BookingStatus.CONFIRMED);
+        when(bookingRepository.findById(1L)).thenReturn(Optional.of(booking));
+        when(bookingRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        // when
+        Booking result = bookingService.checkIn(1L, LocalDate.of(2025, 2, 10));
+        // then
+        assertThat(result.getBookingStatus()).isEqualTo(BookingStatus.CHECKED_IN);
     }
 }
