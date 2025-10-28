@@ -2,12 +2,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
-import pl.piwowarski.application.AvailabilityService;
 import pl.piwowarski.application.BookingService;
 import pl.piwowarski.model.Room;
 import pl.piwowarski.model.booking.Booking;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import pl.piwowarski.model.booking.BookingStatus;
 import pl.piwowarski.repositories.BookingRepository;
 import pl.piwowarski.repositories.RoomRepository;
@@ -16,6 +14,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -111,5 +110,18 @@ class BookingServiceTest {
         Booking result = bookingService.checkIn(1L, LocalDate.of(2025, 2, 10));
         // then
         assertThat(result.getBookingStatus()).isEqualTo(BookingStatus.CHECKED_IN);
+    }
+
+    @Test
+    void checkIn_shouldNotAllowBeforeCheckInDate() {
+        // given
+        Booking booking = buildBooking(2L, 1L, "2025-03-10", "2025-03-15", BookingStatus.CONFIRMED);
+        // when
+        when(bookingRepository.findById(2L)).thenReturn(Optional.of(booking));
+        // then
+        assertThatThrownBy(() ->
+                bookingService.checkIn(2L, LocalDate.of(2025, 3, 9))
+        ).isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("too early");
     }
 }
