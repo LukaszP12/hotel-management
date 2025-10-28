@@ -77,7 +77,11 @@ public class AvailabilityService {
 
         List<Booking> overlappingBookings = bookingRepository.findOverlappingForRooms(roomIds, start, end);
 
-        Set<Long> bookedRoomsIds = overlappingBookings.stream()
+        List<Booking> activeBookings = overlappingBookings.stream()
+                .filter(b -> b.getBookingStatus() != BookingStatus.CANCELLED)
+                .toList();
+
+        Set<Long> bookedRoomsIds = activeBookings.stream()
                 .map(b -> b.getRoom().getId())
                 .collect(Collectors.toSet());
 
