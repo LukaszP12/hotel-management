@@ -3,6 +3,7 @@ package pl.piwowarski.application;
 import org.springframework.stereotype.Service;
 import pl.piwowarski.model.Room;
 import pl.piwowarski.model.booking.Booking;
+import pl.piwowarski.model.booking.BookingStatus;
 import pl.piwowarski.repositories.BookingRepository;
 import pl.piwowarski.repositories.RoomRepository;
 
@@ -35,8 +36,12 @@ public class AvailabilityService {
         List<Long> roomIds = rooms.stream().map(Room::getId).toList();
         List<Booking> bookings = bookingRepository.findOverlappingForRooms(roomIds, start, end);
 
+        List<Booking> activeBookings = bookings.stream()
+                .filter(b -> b.getBookingStatus() != BookingStatus.CANCELLED)
+                .toList();
+
         Map<Long, List<Booking>> bookingsByRoom =
-                bookings.stream().collect(Collectors.groupingBy(b -> b.getRoom().getId()));
+                activeBookings.stream().collect(Collectors.groupingBy(b -> b.getRoom().getId()));
 
         List<LocalDate> days = start.datesUntil(end).toList();
         List<RoomAvailability> result = new ArrayList<>();
@@ -84,8 +89,10 @@ public class AvailabilityService {
     // === DTOs for response ===
 
     public record DayAvailability(LocalDate date, boolean occupied) {
+
     }
 
     public record RoomAvailability(Long roomId, String roomName, List<DayAvailability> days) {
+
     }
 }
