@@ -1,5 +1,20 @@
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import pl.piwowarski.application.RoomService;
+import pl.piwowarski.model.Room;
+import pl.piwowarski.repositories.RoomRepository;
+
 import java.util.List;
 import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class RoomServiceTest {
 
@@ -7,7 +22,7 @@ class RoomServiceTest {
     private RoomRepository roomRepository;
 
     @InjectMocks
-    private RoomServiceImpl roomService; // This doesn't exist yet — TDD step 2!
+    private RoomService roomService; // This doesn't exist yet — TDD step 2!
 
     @BeforeEach
     void setUp() {

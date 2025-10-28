@@ -1,5 +1,16 @@
 package pl.piwowarski.model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+
 @Entity
 @Table(name = "rooms")
 public class Room {
@@ -11,6 +22,15 @@ public class Room {
     @NotBlank(message = "Room number is required")
     @Column(unique = true, nullable = false)
     private String roomNumber;
+
+    @NotBlank(message = "Room name is required")
+    @Column(unique = true, nullable = false)
+    private String roomName;
+
+    @NotNull(message = "Room capacity is required")
+    @Min(value = 1, message = "Room capacity must be at least 1")
+    @Column(nullable = false)
+    private Integer capacity;
 
     @NotBlank(message = "Room type is required")
     @Column(nullable = false)
@@ -73,6 +93,34 @@ public class Room {
 
     public void setAvailable(boolean available) {
         this.available = available;
+    }
+
+    public void setName(String name) {
+        this.roomName = name;
+    }
+
+    public String getRoomName() {
+        return roomName;
+    }
+
+    public Integer getCapacity() {
+        return capacity;
+    }
+
+    public void setCapacity(Integer capacity) {
+        this.capacity = capacity;
+    }
+
+    public void setRoomName(String roomName) {
+        this.roomName = roomName;
+    }
+
+    public RoomType getRoomType() {
+        return roomType;
+    }
+
+    public void setRoomType(RoomType roomType) {
+        this.roomType = roomType;
     }
 
     // --- Helper Methods ---
