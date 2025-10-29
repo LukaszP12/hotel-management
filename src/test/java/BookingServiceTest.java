@@ -216,4 +216,17 @@ class BookingServiceTest {
         assertThat(result.getBookingStatus()).isEqualTo(BookingStatus.CANCELLED);
         assertThat(result.getRefundAmount()).isEqualByComparingTo(200.00);
     }
+
+    @Test
+    void cancelBooking_shouldApply50PercentRefund_ifCancelledWithin48Hours() {
+        Booking booking = buildBooking(2L, 1L, "2025-05-10", "2025-05-15", BookingStatus.CONFIRMED);
+        booking.setTotalPrice(200.00);
+
+        when(bookingRepository.findById(2L)).thenReturn(Optional.of(booking));
+        when(bookingRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        Booking result = bookingService.cancelBookingWithRefund(2L, LocalDate.of(2025,5,9));
+
+        assertThat(result.getRefundAmount()).isEqualByComparingTo(100.00); // 50%
+    }
 }
