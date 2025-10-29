@@ -225,8 +225,21 @@ class BookingServiceTest {
         when(bookingRepository.findById(2L)).thenReturn(Optional.of(booking));
         when(bookingRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        Booking result = bookingService.cancelBookingWithRefund(2L, LocalDate.of(2025,5,9));
+        Booking result = bookingService.cancelBookingWithRefund(2L, LocalDate.of(2025, 5, 9));
 
         assertThat(result.getRefundAmount()).isEqualByComparingTo(100.00); // 50%
+    }
+
+    @Test
+    void cancelBooking_shouldApplyNoRefund_ifCancelledSameDay() {
+        Booking booking = buildBooking(3L, 1L, "2025-05-10", "2025-05-15", BookingStatus.CONFIRMED);
+        booking.setTotalPrice(200.00);
+
+        when(bookingRepository.findById(3L)).thenReturn(Optional.of(booking));
+        when(bookingRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        Booking result = bookingService.cancelBookingWithRefund(3L, LocalDate.of(2025, 5, 10));
+
+        assertThat(result.getRefundAmount()).isEqualByComparingTo(0.0);
     }
 }
