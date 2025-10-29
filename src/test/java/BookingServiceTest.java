@@ -21,6 +21,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -171,5 +173,30 @@ class BookingServiceTest {
         assertThatThrownBy(() -> bookingService.createBooking(booking))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("Room is not available");
+    }
+
+    @Test
+    void shouldSetRoomStatusToDirtyAfterCheckout() {
+        // given
+        Room room = new Room();
+        room.setId(1L);
+        room.setRoomNumber("101");
+        room.setStatus(RoomStatus.CLEAN);
+
+        Booking booking = new Booking();
+        booking.setId(10L);
+        booking.setRoom(room);
+        booking.setBookingStatus(BookingStatus.CHECKED_IN);
+        booking.setCheckOutDate(LocalDate.of(2025, 5, 10));
+        // when
+        when(bookingRepository.findById(10L)).thenReturn(Optional.of(booking));
+        when(bookingRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(roomRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        Booking result = bookingService.checkOut(10L,LocalDate.of(2025,5,10));
+        // then
+        assertThat(result.getBookingStatus()).isEqualTo(BookingStatus.CHECKED_OUT);
+        assertThat(room.getStatus()).isEqualTo(RoomStatus.DIRTY);
+        verify(roomRepository, times(1)).save(room);
     }
 }

@@ -120,4 +120,25 @@ public class BookingService {
         }
         return bookingRepository.findAllByGuestId(guestId);
     }
+
+    public Booking checkOut(Long bookingId, LocalDate checkOutDate) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new IllegalArgumentException("Booking not found with id: " + bookingId));
+
+        if (booking.getBookingStatus() != BookingStatus.CHECKED_IN) {
+            throw new IllegalStateException("Cannot check out a booking that is not checked in.");
+        }
+
+        if (checkOutDate.isBefore(booking.getCheckInDate())) {
+            throw new IllegalStateException("Cannot check out before check-in date.");
+        }
+
+        booking.setBookingStatus(BookingStatus.CHECKED_OUT);
+
+        Room room = booking.getRoom();
+        room.setStatus(RoomStatus.DIRTY);
+        roomRepository.save(room);
+
+        return bookingRepository.save(booking);
+    }
 }
