@@ -1,7 +1,9 @@
-package pl.piwowarski.model;
+package pl.piwowarski.model.room;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -43,12 +45,15 @@ public class Room {
     @Column(nullable = false)
     private boolean available = true;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private RoomStatus status = RoomStatus.CLEAN;
+
     // --- Constructors ---
     public Room() {
     }
 
-    public Room(Long id, RoomType roomType, double price, boolean available) {
-        this.id = id;
+    public Room(RoomType roomType, double price, boolean available) {
         this.roomType = roomType;
         this.price = price;
         this.available = available;
@@ -123,6 +128,10 @@ public class Room {
         this.roomType = roomType;
     }
 
+    public void setStatus(RoomStatus newStatus) {
+        this.status = newStatus;
+    }
+
     // --- Helper Methods ---
     @Override
     public String toString() {
@@ -134,4 +143,5 @@ public class Room {
                 ", available=" + available +
                 '}';
     }
+
 }
