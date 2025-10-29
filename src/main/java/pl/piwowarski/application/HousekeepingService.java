@@ -59,7 +59,7 @@ public class HousekeepingService {
         HousekeepingTask task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new IllegalArgumentException("Cleaning task not found"));
 
-        if (task.getStatus() != TaskStatus.IN_PROGRESS) {
+        if (task.getStatus() != TaskStatus.PENDING) {
             throw new IllegalStateException("Only pending tasks can be started");
         }
 
