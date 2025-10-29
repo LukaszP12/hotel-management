@@ -54,4 +54,16 @@ public class HousekeepingService {
 
         return taskRepository.save(task);
     }
+
+    public HousekeepingTask startCleaning(Long taskId) {
+        HousekeepingTask task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new IllegalArgumentException("Cleaning task not found"));
+
+        if (task.getStatus() != TaskStatus.IN_PROGRESS) {
+            throw new IllegalStateException("Only pending tasks can be started");
+        }
+
+        task.setStatus(TaskStatus.IN_PROGRESS);
+        return taskRepository.save(task);
+    }
 }
