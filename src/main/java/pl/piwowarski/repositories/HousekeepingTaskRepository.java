@@ -8,4 +8,6 @@ import java.util.Optional;
 
 public interface HousekeepingTaskRepository extends JpaRepository<HousekeepingTask, Long> {
     Optional<HousekeepingTask> findByRoomIdAndStatus(Long roomId, TaskStatus status);
+
+    Optional<HousekeepingTask> findById(Long id);
 }
