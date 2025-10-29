@@ -7,6 +7,7 @@ import pl.piwowarski.model.booking.Booking;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface BookingRepository extends JpaRepository<Booking, Long>{
 
@@ -24,5 +25,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long>{
             @Param("end") LocalDate end
     );
 
-    void findById();
+    Optional<Booking> findById();
+
+    List<Booking> findAllByGuestId(Long guestId);
 }
