@@ -3,10 +3,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import pl.piwowarski.application.BookingService;
-import pl.piwowarski.model.Room;
+import pl.piwowarski.model.room.Room;
 import pl.piwowarski.model.booking.Booking;
 
 import pl.piwowarski.model.booking.BookingStatus;
+import pl.piwowarski.model.room.RoomStatus;
 import pl.piwowarski.repositories.BookingRepository;
 import pl.piwowarski.repositories.RoomRepository;
 
@@ -146,8 +147,29 @@ class BookingServiceTest {
         when(bookingRepository.findById(4L)).thenReturn(Optional.of(booking));
         // then
         assertThatThrownBy(() ->
-                bookingService.checkIn(4L, LocalDate.of(2025,3,10))
+                bookingService.checkIn(4L, LocalDate.of(2025, 3, 10))
         ).isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("already checked in");
+    }
+
+    @Test
+    void shouldNotAllowBookingIfRoomIsDirtyOrInMaintenance() {
+        // given
+        Room dirtyRoom = new Room();
+        dirtyRoom.setId(10L);
+        dirtyRoom.setRoomName("105");
+        dirtyRoom.setStatus(RoomStatus.DIRTY);
+
+        Booking booking = new Booking();
+        booking.setId(1L);
+        booking.setRoom(dirtyRoom);
+        booking.setCheckInDate(LocalDate.of(2025, 5, 10));
+        booking.setCheckOutDate(LocalDate.of(2025, 5, 15));
+        // when
+        when(roomRepository.findById(10L)).thenReturn(Optional.of(dirtyRoom))
+        // then
+        assertThatThrownBy(() -> bookingService.createBooking(booking))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Room is not available");
     }
 }
