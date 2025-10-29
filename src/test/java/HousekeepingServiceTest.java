@@ -81,4 +81,34 @@ class HousekeepingServiceTest {
         // then
         assertThat(result.getStatus()).isEqualTo(TaskStatus.IN_PROGRESS);
     }
+
+    @Test
+    void shouldFinishCleaningAndSetRoomToClean() {
+        // given
+        Room room = new Room();
+        room.setId(1L);
+        room.setStatus(RoomStatus.DIRTY);
+
+        Employee cleaner = new Employee();
+        cleaner.setEmployeeID(10);
+        cleaner.setRole(EmployeeRole.CLEANER);
+
+        HousekeepingTask task = new HousekeepingTask();
+        task.setId(100L);
+        task.setRoom(room);
+        task.setAssignedCleaner(cleaner);
+        task.setStatus(TaskStatus.IN_PROGRESS);
+
+        when(taskRepository.findById(100L)).thenReturn(Optional.of(task));
+        when(taskRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(roomRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        // when
+        HousekeepingTask result = housekeepingService.finishCleaning(100L);
+
+        // then
+        assertThat(result.getStatus()).isEqualTo(TaskStatus.COMPLETED);
+        assertThat(room.getStatus()).isEqualTo(RoomStatus.CLEAN);
+        verify(roomRepository, times(1)).save(room);
+    }
 }
