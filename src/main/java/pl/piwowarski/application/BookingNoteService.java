@@ -6,6 +6,8 @@ import pl.piwowarski.model.booking.BookingNote;
 import pl.piwowarski.repositories.BookingNoteRepository;
 import pl.piwowarski.repositories.BookingRepository;
 
+import java.util.List;
+
 @Service
 public class BookingNoteService {
 
@@ -27,5 +29,12 @@ public class BookingNoteService {
 
         BookingNote note = new BookingNote(booking, text.trim(), author == null ? "Unknown" : author);
         return bookingNoteRepository.save(note);
+    }
+
+    public List<BookingNote> getNotesForBooking(Long bookingId) {
+        if (!bookingNoteRepository.existsById(bookingId)) {
+            throw new IllegalArgumentException("Booking not found with id: " + bookingId);
+        }
+        return bookingNoteRepository.findAllByBookingIdOrderByCreatedAtDesc(bookingId);
     }
 }
