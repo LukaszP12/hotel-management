@@ -1,17 +1,13 @@
-package pl.piwowarski.model.employees.housekeeping;
+package pl.piwowarski.model.housekeeping;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import pl.piwowarski.model.employees.Employee;
 import pl.piwowarski.model.room.Room;
-
 import java.time.LocalDateTime;
 
 @Entity
 public class HousekeepingTask {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -20,6 +16,7 @@ public class HousekeepingTask {
     private Room room;
 
     @ManyToOne
+    @JoinColumn(name = "employee_id", nullable = false)
     private Employee assignedCleaner;
 
     @Enumerated(EnumType.STRING)
@@ -49,5 +46,9 @@ public class HousekeepingTask {
 
     public Room getRoom() {
         return room;
+    }
+
+    public Employee getAssignedCleaner() {
+        return assignedCleaner;
     }
 }

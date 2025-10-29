@@ -1,4 +1,4 @@
-package pl.piwowarski.model.employees.housekeeping;
+package pl.piwowarski.model.housekeeping;
 
 public enum TaskStatus {
     PENDING,

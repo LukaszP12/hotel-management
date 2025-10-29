@@ -42,6 +42,9 @@ public class BookingNote {
     }
 
     // Getters & Setters
+    public void setId(Long id) {
+        this.id = id;
+    }
     public Long getId() { return id; }
     public Booking getBooking() { return booking; }
     public void setBooking(Booking booking) { this.booking = booking; }
@@ -51,4 +54,5 @@ public class BookingNote {
     public void setAuthor(String author) { this.author = author; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
 }

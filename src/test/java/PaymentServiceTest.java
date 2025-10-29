@@ -1,29 +1,49 @@
-
-import org.junit.Test;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import pl.piwowarski.application.BookingService;
+import pl.piwowarski.application.PaymentService;
+import pl.piwowarski.model.Guest;
+import pl.piwowarski.model.booking.Booking;
+import pl.piwowarski.model.payment.Payment;
+import pl.piwowarski.model.room.Room;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@SpringBootTest
-class PaymentServiceTest {
 
-    @Autowired
+@ExtendWith(MockitoExtension.class)
+public class PaymentServiceTest {
+
+    @Mock
     private PaymentService paymentService;
 
-    @Autowired
+    @Mock
     private BookingService bookingService;
 
     @Test
-    void shouldCreatePaymentForBooking() {
+    public void shouldCreatePaymentForBooking() {
         // given
-        Booking booking = new Booking("John Doe", LocalDate.of(2026, 4, 1), LocalDate.of(2026, 4, 5));
+        Guest guest = new Guest("John", "Doe", "john.doe@hotmail.com");
+        guest.setId(1L); // simulate existing guest
+
+        Room room = new Room();
+        room.setId(101L);
+        room.setRoomName("Deluxe Room");
+        room.setCapacity(2);
+
+        Booking booking = new Booking(
+                guest,
+                room,
+                LocalDate.of(2026, 4, 1),
+                LocalDate.of(2026, 4, 5)
+        );
+        booking.setId(10L);
         Booking savedBooking = bookingService.createBooking(booking);
 
         Payment payment = new Payment();
@@ -40,5 +60,12 @@ class PaymentServiceTest {
         assertNotNull(savedPayment.getId());
         assertEquals("PAID", savedPayment.getStatus());
         assertNotNull(savedPayment.getBooking());
+    }
+
+    @Test
+    void shouldThrowWhenAmountIsZero() {
+        Payment payment = new Payment();
+        payment.setAmount(0);
+        assertThrows(IllegalArgumentException.class, () -> paymentService.createPayment(payment));
     }
 }
