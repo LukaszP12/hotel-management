@@ -1,9 +1,10 @@
 package pl.piwowarski.application;
 
 import org.springframework.stereotype.Service;
-import pl.piwowarski.model.Room;
+import pl.piwowarski.model.room.Room;
 import pl.piwowarski.model.booking.Booking;
 import pl.piwowarski.model.booking.BookingStatus;
+import pl.piwowarski.model.room.RoomStatus;
 import pl.piwowarski.repositories.BookingRepository;
 import pl.piwowarski.repositories.GuestRepository;
 import pl.piwowarski.repositories.RoomRepository;
@@ -25,6 +26,14 @@ public class BookingService {
     }
 
     public Booking createBooking(Booking booking) {
+        Room room = roomRepository.findById(booking.getRoom().getId())
+                .orElseThrow(() -> new IllegalArgumentException("Room not found with id = " + booking.getRoom().getId()));
+
+        if (room.getStatus() == RoomStatus.DIRTY || room.getStatus() == RoomStatus.IN_MAINTENANCE) {
+            throw new IllegalStateException("Room is not available for booking");
+        }
+
+        booking.setRoom(room);
         return bookingRepository.save(booking);
     }
 
