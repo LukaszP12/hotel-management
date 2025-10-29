@@ -132,6 +132,10 @@ public class Room {
         this.status = newStatus;
     }
 
+    public RoomStatus getStatus() {
+        return status;
+    }
+
     // --- Helper Methods ---
     @Override
     public String toString() {
@@ -143,5 +147,4 @@ public class Room {
                 ", available=" + available +
                 '}';
     }
-
 }
