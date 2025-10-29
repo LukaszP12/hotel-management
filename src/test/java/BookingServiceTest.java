@@ -11,11 +11,13 @@ import pl.piwowarski.model.room.RoomStatus;
 import pl.piwowarski.repositories.BookingRepository;
 import pl.piwowarski.repositories.RoomRepository;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForClassTypes.in;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -193,10 +195,25 @@ class BookingServiceTest {
         when(bookingRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         when(roomRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        Booking result = bookingService.checkOut(10L,LocalDate.of(2025,5,10));
+        Booking result = bookingService.checkOut(10L, LocalDate.of(2025, 5, 10));
         // then
         assertThat(result.getBookingStatus()).isEqualTo(BookingStatus.CHECKED_OUT);
         assertThat(room.getStatus()).isEqualTo(RoomStatus.DIRTY);
         verify(roomRepository, times(1)).save(room);
+    }
+
+    @Test
+    void cancelBooking_shouldApplyFullRefund_ifCancelled48HoursBefore() {
+        // given
+        Booking booking = buildBooking(1L, 1L, "2025-05-10", "2025-05-15", BookingStatus.CONFIRMED);
+        booking.setTotalPrice(200.00);
+        // when
+        when(bookingRepository.findById(1L)).thenReturn(Optional.of(booking));
+        when(bookingRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        // then
+        Booking result = bookingService.cancelBookingWithRefund(1L, LocalDate.of(2025, 5, 8));
+
+        assertThat(result.getBookingStatus()).isEqualTo(BookingStatus.CANCELLED);
+        assertThat(result.getRefundAmount()).isEqualByComparingTo(200.00);
     }
 }
