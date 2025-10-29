@@ -5,6 +5,7 @@ import pl.piwowarski.model.Room;
 import pl.piwowarski.model.booking.Booking;
 import pl.piwowarski.model.booking.BookingStatus;
 import pl.piwowarski.repositories.BookingRepository;
+import pl.piwowarski.repositories.GuestRepository;
 import pl.piwowarski.repositories.RoomRepository;
 
 import java.time.LocalDate;
@@ -14,10 +15,12 @@ import java.util.List;
 public class BookingService {
 
     private final BookingRepository bookingRepository;
+    private final GuestRepository guestRepository;
     private final RoomRepository roomRepository;
 
-    public BookingService(BookingRepository bookingRepository, RoomRepository roomRepository) {
+    public BookingService(BookingRepository bookingRepository, GuestRepository guestRepository, RoomRepository roomRepository) {
         this.bookingRepository = bookingRepository;
+        this.guestRepository = guestRepository;
         this.roomRepository = roomRepository;
     }
 
@@ -100,5 +103,12 @@ public class BookingService {
 
         booking.setBookingStatus(BookingStatus.CHECKED_IN);
         return bookingRepository.save(booking);
+    }
+
+    public List<Booking> getBookingHistoryForGuest(Long guestId) {
+        if (!guestRepository.existsById(guestId)) {
+            throw new IllegalArgumentException("Guest not found with id: " + guestId);
+        }
+        return bookingRepository.findAllByGuestId(guestId);
     }
 }
