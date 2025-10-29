@@ -1,7 +1,7 @@
 package pl.piwowarski.application;
 
 import org.springframework.stereotype.Service;
-import pl.piwowarski.model.Room;
+import pl.piwowarski.model.room.Room;
 import pl.piwowarski.model.booking.Booking;
 import pl.piwowarski.model.booking.BookingStatus;
 import pl.piwowarski.repositories.BookingRepository;

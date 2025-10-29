@@ -6,7 +6,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pl.piwowarski.application.AvailabilityService;
 import pl.piwowarski.model.booking.Booking;
-import pl.piwowarski.model.Room;
+import pl.piwowarski.model.room.Room;
 import pl.piwowarski.model.booking.BookingStatus;
 import pl.piwowarski.repositories.BookingRepository;
 import pl.piwowarski.repositories.RoomRepository;
