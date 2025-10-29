@@ -5,10 +5,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pl.piwowarski.model.employees.Employee;
 import pl.piwowarski.model.employees.EmployeeRole;
-import pl.piwowarski.model.employees.HousekeepingTask;
-import pl.piwowarski.model.employees.TaskStatus;
+import pl.piwowarski.model.employees.housekeeping.HousekeepingTask;
+import pl.piwowarski.model.employees.housekeeping.TaskStatus;
 import pl.piwowarski.model.room.Room;
 import pl.piwowarski.model.room.RoomStatus;
+import pl.piwowarski.repositories.EmployeeRepository;
+import pl.piwowarski.repositories.HousekeepingTaskRepository;
 import pl.piwowarski.repositories.RoomRepository;
 
 import java.util.Optional;
