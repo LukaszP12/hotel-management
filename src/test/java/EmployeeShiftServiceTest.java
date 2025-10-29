@@ -3,14 +3,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import pl.piwowarski.application.EmployeeShiftService;
 import pl.piwowarski.model.employees.Employee;
 import pl.piwowarski.model.employees.EmployeeRole;
+import pl.piwowarski.model.employees.EmployeeShift;
 import pl.piwowarski.repositories.EmployeeRepository;
+import pl.piwowarski.repositories.EmployeeShiftRepository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Optional;
 
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -29,7 +34,7 @@ class EmployeeShiftServiceTest {
     @Test
     void shouldAssignShiftToEmployee() {
         Employee employee = new Employee();
-        employee.setEmployeeID(1);
+        employee.setEmployeeID(1L);
         employee.setFirstName("John");
         employee.setRole(EmployeeRole.CLEANER);
 
@@ -37,7 +42,7 @@ class EmployeeShiftServiceTest {
         LocalTime start = LocalTime.of(8, 0);
         LocalTime end = LocalTime.of(16, 0);
 
-        when(employeeRepository.findById(1)).thenReturn(Optional.of(employee));
+        when(employeeRepository.findById(1L)).thenReturn(Optional.of(employee));
         when(shiftRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         EmployeeShift shift = shiftService.assignShift(1, shiftDate, start, end);

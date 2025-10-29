@@ -1,8 +1,10 @@
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import pl.piwowarski.application.RoomService;
 import pl.piwowarski.model.room.Room;
 import pl.piwowarski.model.room.RoomStatus;
@@ -12,17 +14,20 @@ import pl.piwowarski.repositories.RoomRepository;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.never;
 
 
+@ExtendWith(MockitoExtension.class)
 class RoomServiceTest {
 
     @Mock
@@ -74,10 +79,10 @@ class RoomServiceTest {
         Room room = new Room(RoomType.Single, 120.0, true);
         when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
 
-        Optional<Room> foundRoom = roomService.getRoomById(1L);
+        Room foundRoom = roomService.getRoomById(1L);
 
-        assertTrue(foundRoom.isPresent());
-        assertEquals("101", foundRoom.get().getRoomNumber());
+        assertNotNull(foundRoom);
+        assertEquals("101", foundRoom.getRoomNumber());
         verify(roomRepository, times(1)).findById(1L);
     }
 

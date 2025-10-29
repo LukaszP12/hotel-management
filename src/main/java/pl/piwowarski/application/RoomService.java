@@ -6,6 +6,7 @@ import pl.piwowarski.model.room.RoomStatus;
 import pl.piwowarski.repositories.RoomRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class RoomService {
@@ -47,5 +48,12 @@ public class RoomService {
                 .orElseThrow(() -> new IllegalArgumentException("Room not found with id = " + roomId));
         room.setStatus(newStatus);
         return roomRepository.save(room);
+    }
+
+    public void deleteRoom(Long id) {
+        if (!roomRepository.existsById(id)) {
+            throw new IllegalArgumentException("Room not found with id = " + id);
+        }
+        roomRepository.deleteById(id);
     }
 }

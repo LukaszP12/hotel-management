@@ -51,6 +51,7 @@ public class Booking {
 
     // ---- GETTERS & SETTERS ----
     public Long getId() { return id; }
+    public void setId(Long id) {}
     public Guest getGuest() { return guest; }
     public void setGuest(Guest guest) { this.guest = guest; }
     public Room getRoom() { return room; }

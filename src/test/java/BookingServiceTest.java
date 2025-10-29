@@ -1,24 +1,24 @@
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.boot.test.context.SpringBootTest;
-import pl.piwowarski.application.BookingService;
-import pl.piwowarski.model.room.Room;
-import pl.piwowarski.model.booking.Booking;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import pl.piwowarski.application.BookingService;
+import pl.piwowarski.model.Guest;
+import pl.piwowarski.model.booking.Booking;
 import pl.piwowarski.model.booking.BookingStatus;
+import pl.piwowarski.model.room.Room;
 import pl.piwowarski.model.room.RoomStatus;
 import pl.piwowarski.repositories.BookingRepository;
 import pl.piwowarski.repositories.RoomRepository;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.assertj.core.api.AssertionsForClassTypes.in;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -27,7 +27,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class BookingServiceTest {
 
     @Mock
@@ -38,7 +38,11 @@ class BookingServiceTest {
     @InjectMocks
     private BookingService bookingService;
 
-    private Booking buildBooking(Long id, Long roomId, String in, String out, BookingStatus status) {
+    private Booking buildBooking(Long id,
+                                 Long roomId,
+                                 String in,
+                                 String out,
+                                 BookingStatus status) {
         Booking b = new Booking();
         b.setId(id);
         Room r = new Room();
@@ -60,7 +64,21 @@ class BookingServiceTest {
 
     @Test
     void shouldCreateBooking() {
-        Booking booking = new Booking("John Doe", LocalDate.of(2026, 4, 1), LocalDate.of(2026, 4, 5), "john.doe@hotmail.com");
+        Guest guest = new Guest(
+                "John",
+                "Doe",
+                "john.doe@hotmail.com");
+        guest.setId(1L); // simulate existing guest
+
+        Room room = new Room();
+        room.setId(101L); // simulate existing room
+        room.setRoomName("Deluxe Room");
+        room.setCapacity(2);
+
+        Booking booking = new Booking(guest,
+                room,
+                LocalDate.of(2026, 4, 1),
+                LocalDate.of(2026, 4, 5));
         Booking saved = bookingService.createBooking(booking);
         assertNotNull(saved.getId());
     }
@@ -68,11 +86,22 @@ class BookingServiceTest {
     @Test
     void shouldCancelBooking() {
         // given
-        Booking booking = new Booking("John Doe",
+        Guest guest = new Guest("John",
+                "Doe",
+                "john@example.com");
+        guest.setId(1L);
+
+        Room room = new Room();
+        room.setId(101L);
+        room.setRoomName("Standard Room");
+
+        Booking booking = new Booking(
+                guest,
+                room,
                 LocalDate.of(2026, 5, 1),
-                LocalDate.of(2026, 5, 5),
-                "john@example.com"
+                LocalDate.of(2026, 5, 5)
         );
+
         Booking saved = bookingService.createBooking(booking);
 
         // when
@@ -170,7 +199,7 @@ class BookingServiceTest {
         booking.setCheckInDate(LocalDate.of(2025, 5, 10));
         booking.setCheckOutDate(LocalDate.of(2025, 5, 15));
         // when
-        when(roomRepository.findById(10L)).thenReturn(Optional.of(dirtyRoom))
+        when(roomRepository.findById(10L)).thenReturn(Optional.of(dirtyRoom));
         // then
         assertThatThrownBy(() -> bookingService.createBooking(booking))
                 .isInstanceOf(IllegalStateException.class)
