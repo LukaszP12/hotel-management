@@ -66,4 +66,21 @@ public class HousekeepingService {
         task.setStatus(TaskStatus.IN_PROGRESS);
         return taskRepository.save(task);
     }
+
+    public HousekeepingTask finishCleaning(Long taskId) {
+        HousekeepingTask task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new IllegalArgumentException("Cleaning task not found"));
+
+        if (task.getStatus() != TaskStatus.IN_PROGRESS) {
+            throw new IllegalStateException("Only tasks IN_PROGRESS can be finished");
+        }
+
+        task.setStatus(TaskStatus.COMPLETED);
+
+        Room room = task.getRoom();
+        room.setStatus(RoomStatus.CLEAN);
+        roomRepository.save(room);
+
+        return taskRepository.save(task);
+    }
 }

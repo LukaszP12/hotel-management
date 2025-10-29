@@ -38,4 +38,16 @@ public class HousekeepingTask {
     public void setStatus(TaskStatus taskStatus) {
         this.status = taskStatus;
     }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public TaskStatus getStatus() {
+        return status;
+    }
+
+    public Room getRoom() {
+        return room;
+    }
 }
