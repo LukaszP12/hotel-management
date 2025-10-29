@@ -10,6 +10,7 @@ import pl.piwowarski.repositories.GuestRepository;
 import pl.piwowarski.repositories.RoomRepository;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
@@ -138,6 +139,32 @@ public class BookingService {
         Room room = booking.getRoom();
         room.setStatus(RoomStatus.DIRTY);
         roomRepository.save(room);
+
+        return bookingRepository.save(booking);
+    }
+
+    public Booking cancelBookingWithRefund(Long bookingId, LocalDate cancellationDate) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
+
+        if (booking.getBookingStatus() == BookingStatus.CHECKED_IN ||
+                booking.getBookingStatus() == BookingStatus.CHECKED_OUT) {
+            throw new IllegalStateException("Cannot cancel a booking that has already started.");
+        }
+
+        long hoursBeforeCheckIn = ChronoUnit.HOURS.between(cancellationDate.atStartOfDay(), booking.getCheckInDate().atStartOfDay());
+        double refund = 0.0;
+
+        if (hoursBeforeCheckIn >= 48) {
+            refund = booking.getTotalPrice();
+        } else if (hoursBeforeCheckIn >= 24) {
+            refund = booking.getTotalPrice() * 0.5;
+        } else {
+            refund = 0.0;
+        }
+
+        booking.setRefundAmount(refund);
+        booking.setBookingStatus(BookingStatus.CANCELLED);
 
         return bookingRepository.save(booking);
     }
