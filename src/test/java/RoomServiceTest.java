@@ -4,7 +4,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import pl.piwowarski.application.RoomService;
-import pl.piwowarski.model.Room;
+import pl.piwowarski.model.room.Room;
+import pl.piwowarski.model.room.RoomStatus;
+import pl.piwowarski.model.room.RoomType;
 import pl.piwowarski.repositories.RoomRepository;
 
 import java.util.List;
@@ -12,9 +14,14 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
 
 class RoomServiceTest {
 
@@ -32,8 +39,8 @@ class RoomServiceTest {
     // 🧩 Test #1: Save a new room
     @Test
     void shouldSaveRoomSuccessfully() {
-        Room room = new Room(null, "101", "Single", 120.0, true);
-        Room savedRoom = new Room(1L, "101", "Single", 120.0, true);
+        Room room = new Room(RoomType.Single, 120.0, true);
+        Room savedRoom = new Room(RoomType.Single, 120.0, true);
 
         when(roomRepository.save(room)).thenReturn(savedRoom);
 
@@ -48,8 +55,8 @@ class RoomServiceTest {
     @Test
     void shouldReturnAllRooms() {
         List<Room> mockRooms = List.of(
-                new Room(1L, "101", "Single", 100.0, true),
-                new Room(2L, "102", "Double", 150.0, true)
+                new Room(RoomType.Single, 100.0, true),
+                new Room(RoomType.Double, 150.0, true)
         );
 
         when(roomRepository.findAll()).thenReturn(mockRooms);
@@ -64,7 +71,7 @@ class RoomServiceTest {
     // 🧩 Test #3: Find room by ID
     @Test
     void shouldReturnRoomById() {
-        Room room = new Room(1L, "101", "Single", 120.0, true);
+        Room room = new Room(RoomType.Single, 120.0, true);
         when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
 
         Optional<Room> foundRoom = roomService.getRoomById(1L);
@@ -77,8 +84,8 @@ class RoomServiceTest {
     // 🧩 Test #4: Update existing room
     @Test
     void shouldUpdateRoomSuccessfully() {
-        Room existingRoom = new Room(1L, "101", "Single", 100.0, true);
-        Room updatedRoom = new Room(null, "101", "Suite", 180.0, false);
+        Room existingRoom = new Room(RoomType.Single, 100.0, true);
+        Room updatedRoom = new Room(RoomType.Suite, 180.0, false);
 
         when(roomRepository.findById(1L)).thenReturn(Optional.of(existingRoom));
         when(roomRepository.save(any(Room.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -96,7 +103,7 @@ class RoomServiceTest {
     void shouldThrowExceptionWhenUpdatingNonExistentRoom() {
         when(roomRepository.findById(99L)).thenReturn(Optional.empty());
 
-        Room updatedRoom = new Room(null, "999", "Deluxe", 200.0, true);
+        Room updatedRoom = new Room(RoomType.Deluxe, 200.0, true);
 
         assertThrows(RuntimeException.class, () -> roomService.updateRoom(99L, updatedRoom));
         verify(roomRepository, never()).save(any(Room.class));
@@ -120,5 +127,20 @@ class RoomServiceTest {
 
         assertThrows(RuntimeException.class, () -> roomService.deleteRoom(99L));
         verify(roomRepository, never()).deleteById(99L);
+    }
+
+    @Test
+    void shouldUpdateRoomStatus() {
+        // given
+        Room room = new Room();
+        room.setId(1L);
+        room.setRoomName("101");
+        room.setStatus(RoomStatus.CLEAN);
+        // when
+        when(roomRepository.findById(1L)).thenReturn(Optional.of(room));
+        when(roomRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        // then
+        Room result = roomService.updateRoomStatus(1L,RoomStatus.IN_MAINTENANCE);
+        assertThat(result.getStatus()).isEqualTo(RoomStatus.IN_MAINTENANCE);
     }
 }
