@@ -2,12 +2,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
-import pl.piwowarski.application.AvailabilityService;
 import pl.piwowarski.application.BookingService;
 import pl.piwowarski.model.Room;
 import pl.piwowarski.model.booking.Booking;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import pl.piwowarski.model.booking.BookingStatus;
 import pl.piwowarski.repositories.BookingRepository;
 import pl.piwowarski.repositories.RoomRepository;
@@ -16,6 +14,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -97,7 +96,58 @@ class BookingServiceTest {
                 LocalDate.of(2025, 2, 2), LocalDate.of(2025, 2, 6));
         // then
         assertThat(result.getRoom().getId()).isEqualTo(2L);
-        assertThat(result.getCheckInDate()).isEqualTo(LocalDate.of(2025,2,2));
-        assertThat(result.getCheckOutDate()).isEqualTo(LocalDate.of(2025,2,6));
+        assertThat(result.getCheckInDate()).isEqualTo(LocalDate.of(2025, 2, 2));
+        assertThat(result.getCheckOutDate()).isEqualTo(LocalDate.of(2025, 2, 6));
+    }
+
+    @Test
+    void checkIn_shouldSetStatusToCheckedIn_whenValid() {
+        // given
+        Booking booking = buildBooking(1L, 1L, "2025-02-10", "2025-02-15", BookingStatus.CONFIRMED);
+        when(bookingRepository.findById(1L)).thenReturn(Optional.of(booking));
+        when(bookingRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        // when
+        Booking result = bookingService.checkIn(1L, LocalDate.of(2025, 2, 10));
+        // then
+        assertThat(result.getBookingStatus()).isEqualTo(BookingStatus.CHECKED_IN);
+    }
+
+    @Test
+    void checkIn_shouldNotAllowBeforeCheckInDate() {
+        // given
+        Booking booking = buildBooking(2L, 1L, "2025-03-10", "2025-03-15", BookingStatus.CONFIRMED);
+        // when
+        when(bookingRepository.findById(2L)).thenReturn(Optional.of(booking));
+        // then
+        assertThatThrownBy(() ->
+                bookingService.checkIn(2L, LocalDate.of(2025, 3, 9))
+        ).isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("too early");
+    }
+
+    @Test
+    void checkIn_shouldNotAllowCancelledBookings() {
+        // given
+        Booking booking = buildBooking(3L, 1L, "2025-03-10", "2025-03-15", BookingStatus.CANCELLED);
+        // when
+        when(bookingRepository.findById(3L)).thenReturn(Optional.of(booking));
+        // then
+        assertThatThrownBy(() ->
+                bookingService.checkIn(3L, LocalDate.of(2025, 3, 10))
+        ).isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("cancelled");
+    }
+
+    @Test
+    void checkIn_shouldNotAllowAlreadyCheckedIn() {
+        // given
+        Booking booking = buildBooking(4L, 1L, "2025-03-10", "2025-03-15", BookingStatus.CHECKED_IN);
+        // when
+        when(bookingRepository.findById(4L)).thenReturn(Optional.of(booking));
+        // then
+        assertThatThrownBy(() ->
+                bookingService.checkIn(4L, LocalDate.of(2025,3,10))
+        ).isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("already checked in");
     }
 }

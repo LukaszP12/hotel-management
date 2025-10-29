@@ -81,4 +81,24 @@ public class BookingService {
         booking.setCheckOutDate(newCheckOut);
         return bookingRepository.save(booking);
     }
+
+    public Booking checkIn(Long bookingId, LocalDate today) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new IllegalArgumentException("Booking not found with id: " + bookingId));
+
+        if (booking.getBookingStatus() == BookingStatus.CANCELLED) {
+            throw new IllegalStateException("Cannot check in a cancelled booking.");
+        }
+
+        if (booking.getBookingStatus() == BookingStatus.CHECKED_IN) {
+            throw new IllegalStateException("Guest is already checked in.");
+        }
+
+        if (today.isBefore(booking.getCheckInDate())) {
+            throw new IllegalStateException("Cannot check in before the check-in date.");
+        }
+
+        booking.setBookingStatus(BookingStatus.CHECKED_IN);
+        return bookingRepository.save(booking);
+    }
 }
