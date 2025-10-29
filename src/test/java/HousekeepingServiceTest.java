@@ -3,6 +3,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import pl.piwowarski.application.HousekeepingService;
 import pl.piwowarski.model.employees.Employee;
 import pl.piwowarski.model.employees.EmployeeRole;
 import pl.piwowarski.model.employees.housekeeping.HousekeepingTask;
@@ -54,5 +55,30 @@ class HousekeepingServiceTest {
         assertThat(task.getRoom().getId()).isEqualTo(1L);
         assertThat(task.getAssignedCleaner().getEmployeeID()).isEqualTo(10);
         assertThat(task.getStatus()).isEqualTo(TaskStatus.PENDING);
+    }
+
+    @Test
+    void shouldStartCleaningTask() {
+        // given
+        Room room = new Room();
+        room.setId(1L);
+        room.setStatus(RoomStatus.DIRTY);
+
+        Employee cleaner = new Employee();
+        cleaner.setEmployeeID(10);
+        cleaner.setRole(EmployeeRole.CLEANER);
+
+        HousekeepingTask task = new HousekeepingTask();
+        task.setId(100L);
+        task.setRoom(room);
+        task.setAssignedCleaner(cleaner);
+        task.setStatus(TaskStatus.PENDING);
+        // when
+        when(taskRepository.findById(100L)).thenReturn(Optional.of(task));
+        when(taskRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        HousekeepingTask result = housekeepingService.startCleaning(100L);
+        // then
+        assertThat(result.getStatus()).isEqualTo(TaskStatus.IN_PROGRESS);
     }
 }
